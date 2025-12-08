@@ -41,12 +41,15 @@ def predict(data: InputData):
 
     with torch.no_grad():
         outputs = bert_model(**tokens)
-        pooled_output = outputs.pooler_output
+        cls_embedding = outputs.last_hidden_state[:, 0, :]  # CLS token
 
-    pred = classifier.predict(pooled_output.numpy())[0]
-    proba = classifier.predict_proba(pooled_output.numpy())[0]
+    pred = classifier.predict(cls_embedding.numpy())[0]
+    proba = classifier.predict_proba(cls_embedding.numpy())[0]
+    
+    print(pred, proba)
 
     return {
-        "prediction": "False" if pred == 0 else "True",
+        # pred == 0 é FAKE. O isFake do front-end é TRUE se a string for "True".
+        "prediction": "fake" if pred == 1 else "true", 
         "probabilities": proba.tolist()
     }
